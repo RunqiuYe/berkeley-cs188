@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -68,9 +69,11 @@ def tinyMazeSearch(problem):
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
     from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -103,12 +106,13 @@ def depthFirstSearch(problem: SearchProblem):
             return currActions
         if state not in reached:
             reached.add(state)
-            for (successor, action, cost) in problem.getSuccessors(state):
+            for successor, action, stepCost in problem.getSuccessors(state):
                 newActions = currActions + [action]
                 newNode = (successor, newActions)
                 frontier.push(newNode)
 
     return None
+
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
@@ -129,17 +133,43 @@ def breadthFirstSearch(problem: SearchProblem):
             return currActions
         if state not in reached:
             reached.add(state)
-            for (successor, action, cost) in problem.getSuccessors(state):
+            for successor, action, stepCost in problem.getSuccessors(state):
                 newActions = currActions + [action]
                 newNode = (successor, newActions)
                 frontier.push(newNode)
 
     return None
 
+
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    reached = set()
+    frontier = util.PriorityQueue()
+    startActions = []
+    startCost = problem.getCostOfActions(startActions)
+
+    startState = problem.getStartState()
+    startNode = (startState, startActions, startCost)
+    frontier.push(startNode, startCost)
+
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        state = node[0]
+        currActions = node[1]
+        currCost = node[2]
+        if problem.isGoalState(state):
+            return currActions
+        if state not in reached:
+            reached.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                newActions = currActions + [action]
+                newCost = currCost + stepCost
+                newNode = (successor, newActions, newCost)
+                frontier.update(newNode, newCost)
+
+    return None
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -148,10 +178,35 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    reached = set()
+    frontier = util.PriorityQueue()
+    startState = problem.getStartState()
+    startActions = []
+    startCost = problem.getCostOfActions(startActions) + heuristic(startState, problem)
+
+    startNode = (startState, startActions, startCost)
+    frontier.push(startNode, startCost)
+
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        state = node[0]
+        currActions = node[1]
+        currCost = node[2]
+        if problem.isGoalState(state):
+            return currActions
+        if state not in reached:
+            reached.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                newActions = currActions + [action]
+                newCost = problem.getCostOfActions(newActions) + heuristic(successor, problem)
+                newNode = (successor, newActions, newCost)
+                frontier.push(newNode, newCost)
+
+    return None
 
 
 # Abbreviations
