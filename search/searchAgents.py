@@ -345,13 +345,12 @@ class CornersProblem(search.SearchProblem):
         The state space contains the current position and a whether the four
         corners are visited using booleans.
         """
-        
-        visited1 = self.startingPosition == self.corners[0]
-        visited2 = self.startingPosition == self.corners[1]
-        visited3 = self.startingPosition == self.corners[2]
-        visited4 = self.startingPosition == self.corners[3]
-        self.startState = (self.startingPosition, visited1,
-                           visited2, visited3, visited4)
+        self.numCorners = 4
+        visitedCorner = [False, False, False, False]
+        for i in range(self.numCorners):
+            visitedCorner[i] = self.startingPosition == self.corners[i]
+        visitedCorner = tuple(visitedCorner)
+        self.startState = (self.startingPosition, visitedCorner)
         
 
     def getStartState(self):
@@ -367,7 +366,10 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return state[1] and state[2] and state[3] and state[4]
+        for i in range(self.numCorners):
+            if not state[1][i]:
+                return False
+        return True
 
     def getSuccessors(self, state: Any):
         """
@@ -403,11 +405,12 @@ class CornersProblem(search.SearchProblem):
 
             if not hitsWall:
                 newPosition = (nextx, nexty)
-                visited1 = (newPosition == self.corners[0]) or state[1]
-                visited2 = (newPosition == self.corners[1]) or state[2]
-                visited3 = (newPosition == self.corners[2]) or state[3]
-                visited4 = (newPosition == self.corners[3]) or state[4]
-                newState = (newPosition, visited1, visited2, visited3, visited4)
+                visitedCorner = state[1]
+                newVisitedCorner = [False, False, False, False]
+                for i in range(self.numCorners):
+                    newVisitedCorner[i] = visitedCorner[i] or (newPosition == self.corners[i])
+                newVisitedCorner = tuple(newVisitedCorner)
+                newState = (newPosition, newVisitedCorner)
                 cost = 1
                 successors.append((newState, action, cost))
 
@@ -430,10 +433,16 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 def manhattanDistance(position, goal):
-    "The Manhattan distance heuristic for a PositionSearchProblem"
+    "The Manhattan distance for a CornersProblem"
     xy1 = position
     xy2 = goal
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
+def euclideanDistance(position, goal):
+    "The Manhattan distance for a CornersProblem"
+    xy1 = position
+    xy2 = goal
+    return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
@@ -452,17 +461,14 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    distanceToCorners = [0,0,0,0]
     currPosition = state[0]
-    if not state[1]:
-        distanceToCorners[0] = manhattanDistance(currPosition, problem.corners[0])
-    if not state[2]:
-        distanceToCorners[1] = manhattanDistance(currPosition, problem.corners[1])
-    if not state[3]:
-        distanceToCorners[2] = manhattanDistance(currPosition, problem.corners[2])
-    if not state[4]:
-        distanceToCorners[3] = manhattanDistance(currPosition, problem.corners[3])
-    return max(distanceToCorners)  # Default to trivial solution
+    visitedCorner = state[1]
+    res = 0
+    for i in range(problem.numCorners):
+        if not visitedCorner[i]:
+            res = max(res, manhattanDistance(currPosition, problem.corners[i]),
+                      euclideanDistance(currPosition, problem.corners[i]))
+    return res
 
 
 class AStarCornersAgent(SearchAgent):
