@@ -341,20 +341,33 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
+        """
+        The state space contains the current position and a whether the four
+        corners are visited using booleans.
+        """
+        
+        visited1 = self.startingPosition == self.corners[0]
+        visited2 = self.startingPosition == self.corners[1]
+        visited3 = self.startingPosition == self.corners[2]
+        visited4 = self.startingPosition == self.corners[3]
+        self.startState = (self.startingPosition, visited1,
+                           visited2, visited3, visited4)
+        
+
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startState
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state[1] and state[2] and state[3] and state[4]
 
     def getSuccessors(self, state: Any):
         """
@@ -382,6 +395,21 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+
+            if not hitsWall:
+                newPosition = (nextx, nexty)
+                visited1 = (newPosition == self.corners[0]) or state[1]
+                visited2 = (newPosition == self.corners[1]) or state[2]
+                visited3 = (newPosition == self.corners[2]) or state[3]
+                visited4 = (newPosition == self.corners[3]) or state[4]
+                newState = (newPosition, visited1, visited2, visited3, visited4)
+                cost = 1
+                successors.append((newState, action, cost))
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
