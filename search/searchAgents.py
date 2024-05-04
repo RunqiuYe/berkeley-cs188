@@ -429,6 +429,11 @@ class CornersProblem(search.SearchProblem):
                 return 999999
         return len(actions)
 
+def manhattanDistance(position, goal):
+    "The Manhattan distance heuristic for a PositionSearchProblem"
+    xy1 = position
+    xy2 = goal
+    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
@@ -447,7 +452,17 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    distanceToCorners = [0,0,0,0]
+    currPosition = state[0]
+    if not state[1]:
+        distanceToCorners[0] = manhattanDistance(currPosition, problem.corners[0])
+    if not state[2]:
+        distanceToCorners[1] = manhattanDistance(currPosition, problem.corners[1])
+    if not state[3]:
+        distanceToCorners[2] = manhattanDistance(currPosition, problem.corners[2])
+    if not state[4]:
+        distanceToCorners[3] = manhattanDistance(currPosition, problem.corners[3])
+    return max(distanceToCorners)  # Default to trivial solution
 
 
 class AStarCornersAgent(SearchAgent):
