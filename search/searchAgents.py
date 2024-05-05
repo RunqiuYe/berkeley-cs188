@@ -351,7 +351,6 @@ class CornersProblem(search.SearchProblem):
             visitedCorner[i] = self.startingPosition == self.corners[i]
         visitedCorner = tuple(visitedCorner)
         self.startState = (self.startingPosition, visitedCorner)
-        
 
     def getStartState(self):
         """
@@ -408,7 +407,9 @@ class CornersProblem(search.SearchProblem):
                 visitedCorner = state[1]
                 newVisitedCorner = [False, False, False, False]
                 for i in range(self.numCorners):
-                    newVisitedCorner[i] = visitedCorner[i] or (newPosition == self.corners[i])
+                    newVisitedCorner[i] = visitedCorner[i] or (
+                        newPosition == self.corners[i]
+                    )
                 newVisitedCorner = tuple(newVisitedCorner)
                 newState = (newPosition, newVisitedCorner)
                 cost = 1
@@ -432,17 +433,20 @@ class CornersProblem(search.SearchProblem):
                 return 999999
         return len(actions)
 
+
 def manhattanDistance(position, goal):
     "The Manhattan distance for a CornersProblem"
     xy1 = position
     xy2 = goal
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
+
 def euclideanDistance(position, goal):
     "The Manhattan distance for a CornersProblem"
     xy1 = position
     xy2 = goal
     return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
+
 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
@@ -466,8 +470,11 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     res = 0
     for i in range(problem.numCorners):
         if not visitedCorner[i]:
-            res = max(res, manhattanDistance(currPosition, problem.corners[i]),
-                      euclideanDistance(currPosition, problem.corners[i]))
+            res = max(
+                res,
+                manhattanDistance(currPosition, problem.corners[i]),
+                euclideanDistance(currPosition, problem.corners[i]),
+            )
     return res
 
 
